@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.brightcontroller.allex.brightcontroller.PreferencesActivity"
+    android:padding="8dp"
+    android:background="#f1f1f1">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/textView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:labelFor="@+id/radioGroup"
+            android:text="Escolha o modo como o brilho será ajustado"
+            android:textColor="@color/colorAccent"
+            android:textSize="16sp"/>
+
+        <RadioGroup
+            android:id="@+id/radioGroup"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" >
+
+            <RadioButton
+                android:id="@+id/rbLowHigh"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Aumentar o brilho quando houver mais luz"
+                android:textColor="@color/colorAccent"
+                android:buttonTint="@color/colorAccent"/>
+
+            <RadioButton
+                android:id="@+id/rbHighLow"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Aumentar o brilho quando houver menos luz"
+                android:textColor="@color/colorAccent"
+                android:buttonTint="@color/colorAccent"/>
+
+        </RadioGroup>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="#ccc"
+            android:layout_marginBottom="8dp"
+            android:layout_marginTop="8dp"/>
+
+        <TextView
+            android:id="@+id/textView2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Digite a frequência de atualização do brilho em segundos"
+            android:labelFor="@+id/editTextInterval"
+            android:textColor="@color/colorAccent"
+            android:textSize="16sp"/>
+
+        <EditText
+            android:id="@+id/editTextInterval"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ems="10"
+            android:inputType="number"
+            android:textColor="@color/colorAccent"/>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="#ccc"
+            android:layout_marginBottom="8dp"
+            android:layout_marginTop="8dp"/>
+
+        <Switch
+            android:id="@+id/switchRemeberBright"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Lembrar o brilho antes do widget"
+            android:switchPadding="12dp"
+            android:textColor="@color/colorAccent"
+            android:trackTint="@color/colorPrimaryDark"
+            android:textSize="16sp"/>
+
+    </LinearLayout>
+
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/btnSave"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:clickable="true"
+        app:fabSize="normal"
+        app:srcCompat="@android:drawable/ic_menu_save"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        android:layout_margin="20dp"/>
+
+</RelativeLayout>
