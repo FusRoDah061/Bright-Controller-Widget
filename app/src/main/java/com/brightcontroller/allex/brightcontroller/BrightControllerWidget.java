@@ -36,33 +36,42 @@ public class BrightControllerWidget extends AppWidgetProvider {
 
     static void updateAppWidget(Context context, AppWidgetManager appWidgetManager, int appWidgetId) {
 
+        GerenciadorNotificacoes not = GerenciadorNotificacoes.getInstance(context);
+        ManagePreferences prefs = new ManagePreferences(context);
+
         // Construct the RemoteViews object
         RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.bright_controller_widget);
 
         if(startService){
             views.setTextViewText(R.id.btn_controller_status, SERVICE_OFF);
+            prefs.writeBoolean(ManagePreferences.PREFS_IS_RUNNING, true);
+            not.updateNotification(true);
         }
         else{
             views.setTextViewText(R.id.btn_controller_status, SERVICE_ON);
+            prefs.writeBoolean(ManagePreferences.PREFS_IS_RUNNING, false);
+            not.updateNotification(false);
         }
 
         //Intent com uma ação que será recebida pelo próprio widget
         Intent intent = new Intent(context, BrightControllerWidget.class);
         intent.setAction(INTENT_ACTION);
         //PendinIntent que carrega o intent acima e dispara quando a TextView é clicada
-        PendingIntent toggle = PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-        views.setOnClickPendingIntent(R.id.btn_controller_status, toggle);
+        PendingIntent toggleIntent = PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        views.setOnClickPendingIntent(R.id.btn_controller_status, toggleIntent);
 
         //PendingIntent que abre a tela de configurações
-        PendingIntent prefs = PendingIntent.getActivity(context, 0, new Intent(context, PreferencesActivity.class), 0);
-        views.setOnClickPendingIntent(R.id.btn_preferences, prefs);
+        PendingIntent prefsIntent = PendingIntent.getActivity(context, 0, new Intent(context, PreferencesActivity.class), 0);
+        views.setOnClickPendingIntent(R.id.btn_preferences, prefsIntent);
 
         // Instruct the widget manager to update the widget
         appWidgetManager.updateAppWidget(appWidgetId, views);
     }
 
     private void loadPreferences(Context context){
-        managePreferences = new ManagePreferences(context);
+        if(null == managePreferences){
+            managePreferences = new ManagePreferences(context);
+        }
 
         rememberBrightness = managePreferences.getBoolean(ManagePreferences.PREFS_BACKUP_BRIGHTNESS_LEVEL);
 
@@ -82,6 +91,7 @@ public class BrightControllerWidget extends AppWidgetProvider {
     @Override
     public void onEnabled(Context context) {
         // Enter relevant functionality for when the first widget is created
+        GerenciadorNotificacoes not = GerenciadorNotificacoes.getInstance(context);
 
         loadPreferences(context);
 
@@ -101,11 +111,16 @@ public class BrightControllerWidget extends AppWidgetProvider {
             Log.i(LOG_TAG, "Sem premissão de escrita.");
         }
 
+        not.showNotification();
+
     }
 
     @Override
     public void onDisabled(Context context) {
         // Enter relevant functionality for when the last widget is disabled
+        GerenciadorNotificacoes not = GerenciadorNotificacoes.getInstance(context);
+        not.closeNotification();
+
         //Finalizar o serviço aqui
         Intent intent = new Intent(context, LuminosityWatcherService.class);
         context.stopService(intent);
@@ -120,6 +135,10 @@ public class BrightControllerWidget extends AppWidgetProvider {
         super.onReceive(context, intent);
 
         if(INTENT_ACTION.equals(intent.getAction())){
+
+            if(null == managePreferences){
+                managePreferences = new ManagePreferences(context);
+            }
 
             Log.i(LOG_TAG, "Pegou clique");
 
@@ -139,13 +158,14 @@ public class BrightControllerWidget extends AppWidgetProvider {
 
                 //Toast.makeText(context, "OFF", Toast.LENGTH_SHORT).show();
                 views.setTextViewText(R.id.btn_controller_status, SERVICE_ON);
+                managePreferences.writeBoolean(ManagePreferences.PREFS_IS_RUNNING, true);
 
                 if(rememberBrightness) {
                     restoreBrightness(context);
                 }
 
                 stopWatcher(context);
-
+                Log.i(LOG_TAG, "Parou a aplicação");
             }
             else{
                 startService = true;
@@ -153,13 +173,14 @@ public class BrightControllerWidget extends AppWidgetProvider {
 
                 //Toast.makeText(context, "ON", Toast.LENGTH_SHORT).show();
                 views.setTextViewText(R.id.btn_controller_status, SERVICE_OFF);
+                managePreferences.writeBoolean(ManagePreferences.PREFS_IS_RUNNING, false);
 
                 if(rememberBrightness) {
                     saveBrightness(context);
                 }
 
                 startWatcher(context);
-
+                Log.i(LOG_TAG, "Retomou a aplicação");
             }
 
             Log.i(LOG_TAG, "Status:\nstartService = " + String.valueOf(startService) + "\nhasPermission = " + String.valueOf(hasPermission) + "\nrememberBrightness = " + String.valueOf(rememberBrightness));

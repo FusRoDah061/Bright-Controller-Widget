@@ -38,6 +38,8 @@ public class ManagePreferences {
 
     private final String PREFS_EXISTS = "com.brightcontroller.allex.EXISTS";
 
+    public static final String PREFS_IS_RUNNING = "com.brightcontroller.allex.RUNNING";
+
     /**
      * [String]
      * Constante com a chave que indica se deve ou não lembrar o nível de brilho da tela antes do widget ser adicionado.
@@ -76,12 +78,6 @@ public class ManagePreferences {
      * Sinaliza para lembrar o nível de brilho antes do widget ser adicionado.
      */
     public static final boolean VAL_REMEMBER_BRIGHTNESS_LEVEL = true;
-
-    /**
-     * [boolean]
-     * Sinaliza para não lembrar o nível de brilho antes do widget ser adicionado.
-     */
-    public static final boolean VAL_NOT_REMEMBER_BRIGHTNESS_LEVEL = false;
 
     private SharedPreferences sharedPreferences;
 
