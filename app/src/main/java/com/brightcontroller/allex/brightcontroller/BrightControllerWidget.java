@@ -30,13 +30,13 @@ public class BrightControllerWidget extends AppWidgetProvider {
     private static boolean hasPermission = false;
 
     private ManagePreferences managePreferences;
+    private static GerenciadorNotificacoes not = new GerenciadorNotificacoes();
 
     //Preferências
     private boolean rememberBrightness = true;
 
     static void updateAppWidget(Context context, AppWidgetManager appWidgetManager, int appWidgetId) {
 
-        GerenciadorNotificacoes not = GerenciadorNotificacoes.getInstance(context);
         ManagePreferences prefs = new ManagePreferences(context);
 
         // Construct the RemoteViews object
@@ -45,12 +45,14 @@ public class BrightControllerWidget extends AppWidgetProvider {
         if(startService){
             views.setTextViewText(R.id.btn_controller_status, SERVICE_OFF);
             prefs.writeBoolean(ManagePreferences.PREFS_IS_RUNNING, true);
-            not.updateNotification(true);
+            not.updateNotification(context);
+            Log.i(LOG_TAG, "Atualizou notificação");
         }
         else{
             views.setTextViewText(R.id.btn_controller_status, SERVICE_ON);
             prefs.writeBoolean(ManagePreferences.PREFS_IS_RUNNING, false);
-            not.updateNotification(false);
+            not.updateNotification(context);
+            Log.i(LOG_TAG, "Atualizou notificação");
         }
 
         //Intent com uma ação que será recebida pelo próprio widget
@@ -91,7 +93,7 @@ public class BrightControllerWidget extends AppWidgetProvider {
     @Override
     public void onEnabled(Context context) {
         // Enter relevant functionality for when the first widget is created
-        GerenciadorNotificacoes not = GerenciadorNotificacoes.getInstance(context);
+
 
         loadPreferences(context);
 
@@ -111,14 +113,13 @@ public class BrightControllerWidget extends AppWidgetProvider {
             Log.i(LOG_TAG, "Sem premissão de escrita.");
         }
 
-        not.showNotification();
+        not.showNotification(context);
 
     }
 
     @Override
     public void onDisabled(Context context) {
         // Enter relevant functionality for when the last widget is disabled
-        GerenciadorNotificacoes not = GerenciadorNotificacoes.getInstance(context);
         not.closeNotification();
 
         //Finalizar o serviço aqui
@@ -158,7 +159,7 @@ public class BrightControllerWidget extends AppWidgetProvider {
 
                 //Toast.makeText(context, "OFF", Toast.LENGTH_SHORT).show();
                 views.setTextViewText(R.id.btn_controller_status, SERVICE_ON);
-                managePreferences.writeBoolean(ManagePreferences.PREFS_IS_RUNNING, true);
+                managePreferences.writeBoolean(ManagePreferences.PREFS_IS_RUNNING, false);
 
                 if(rememberBrightness) {
                     restoreBrightness(context);
@@ -173,7 +174,7 @@ public class BrightControllerWidget extends AppWidgetProvider {
 
                 //Toast.makeText(context, "ON", Toast.LENGTH_SHORT).show();
                 views.setTextViewText(R.id.btn_controller_status, SERVICE_OFF);
-                managePreferences.writeBoolean(ManagePreferences.PREFS_IS_RUNNING, false);
+                managePreferences.writeBoolean(ManagePreferences.PREFS_IS_RUNNING, true);
 
                 if(rememberBrightness) {
                     saveBrightness(context);
@@ -182,6 +183,9 @@ public class BrightControllerWidget extends AppWidgetProvider {
                 startWatcher(context);
                 Log.i(LOG_TAG, "Retomou a aplicação");
             }
+
+            not.updateNotification(context);
+            Log.i(LOG_TAG, "Atualizou notificação");
 
             Log.i(LOG_TAG, "Status:\nstartService = " + String.valueOf(startService) + "\nhasPermission = " + String.valueOf(hasPermission) + "\nrememberBrightness = " + String.valueOf(rememberBrightness));
 

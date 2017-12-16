@@ -14,26 +14,16 @@ import android.util.Log;
 
 public class GerenciadorNotificacoes {
 
-    private static final String LOG_TAG = "brightcontrollerwidget";
+    private static final String TAG = "GerenciadorNotificacoes";
     private final int NOTIFICATION_ID = 1995463;
-    private Context context;
     private static GerenciadorNotificacoes instance = null;
     private NotificationManager notificationManager;
 
-    private GerenciadorNotificacoes(Context context){
-        this.context = context;
-        notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-    }
-
-    public static GerenciadorNotificacoes getInstance(Context context){
-        if(instance == null){
-            instance = new GerenciadorNotificacoes(context);
+    public void showNotification(Context context){
+        if(notificationManager == null) {
+            notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
         }
 
-        return instance;
-    }
-
-    public void showNotification(){
         ManagePreferences prefs = new ManagePreferences(context);
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(context);
@@ -54,33 +44,16 @@ public class GerenciadorNotificacoes {
             builder.setSmallIcon(R.drawable.ic_notification_controller_off);
         }
 
-        notificationManager.notify(NOTIFICATION_ID, builder.build());
+        notificationManager.notify(TAG, NOTIFICATION_ID, builder.build());
     }
 
     public void closeNotification(){
-        notificationManager.cancel(NOTIFICATION_ID);
+        notificationManager.cancel(TAG, NOTIFICATION_ID);
     }
 
-    public void updateNotification(boolean running){
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(context);
-        builder.setContentTitle("Bright Controller");
-        builder.setOngoing(true);
-        builder.setLocalOnly(true);
-
-        if(android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            builder.setCategory(Notification.CATEGORY_SERVICE);
-        }
-
-        if(running) {
-            builder.setContentText("Executando, toque para pausar");
-            builder.setSmallIcon(R.drawable.ic_notification_controller_on);
-        }
-        else{
-            builder.setContentText("Pausado, toque para retomar");
-            builder.setSmallIcon(R.drawable.ic_notification_controller_off);
-        }
-
-        notificationManager.notify(NOTIFICATION_ID, builder.build());
+    public void updateNotification(Context context){
+        showNotification(context);
+        Log.i(TAG, "Atualizou notificação");
     }
 
 }
