@@ -44,15 +44,9 @@ public class BrightControllerWidget extends AppWidgetProvider {
 
         if(startService){
             views.setTextViewText(R.id.btn_controller_status, SERVICE_OFF);
-            prefs.writeBoolean(ManagePreferences.PREFS_IS_RUNNING, true);
-            not.updateNotification(context);
-            Log.i(LOG_TAG, "Atualizou notificação");
         }
         else{
             views.setTextViewText(R.id.btn_controller_status, SERVICE_ON);
-            prefs.writeBoolean(ManagePreferences.PREFS_IS_RUNNING, false);
-            not.updateNotification(context);
-            Log.i(LOG_TAG, "Atualizou notificação");
         }
 
         //Intent com uma ação que será recebida pelo próprio widget
