@@ -28,7 +28,6 @@ public class BrightControllerWidget extends AppWidgetProvider {
     private static boolean hasPermission = false;
 
     private ManagePreferences managePreferences;
-    private static GerenciadorNotificacoes not = new GerenciadorNotificacoes();
 
     //Preferências
     private boolean rememberBrightness = true;
@@ -105,14 +104,11 @@ public class BrightControllerWidget extends AppWidgetProvider {
             Log.i(LOG_TAG, "Sem premissão de escrita.");
         }
 
-        not.showNotification(context);
-
     }
 
     @Override
     public void onDisabled(Context context) {
         // Enter relevant functionality for when the last widget is disabled
-        not.closeNotification();
 
         //Finalizar o serviço aqui
         Intent intent = new Intent(context, LuminosityWatcherService.class);
@@ -176,7 +172,6 @@ public class BrightControllerWidget extends AppWidgetProvider {
                 Log.i(LOG_TAG, "Retomou a aplicação");
             }
 
-            not.updateNotification(context);
             Log.i(LOG_TAG, "Atualizou notificação");
 
             Log.i(LOG_TAG, "Status:\nstartService = " + String.valueOf(startService) + "\nhasPermission = " + String.valueOf(hasPermission) + "\nrememberBrightness = " + String.valueOf(rememberBrightness));

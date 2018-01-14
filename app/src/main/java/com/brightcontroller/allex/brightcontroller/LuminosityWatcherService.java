@@ -25,8 +25,10 @@ public class LuminosityWatcherService extends Service {
 
     private final String LOG_TAG = "luminositywatcher";
 
-    WatcherThread watcherThread;
-    Context appContext = getBaseContext();
+    private WatcherThread watcherThread;
+    private Context appContext = getBaseContext();
+
+    private final int NOTIFICATION_ID = 8991;
 
     @Nullable
     @Override
@@ -41,7 +43,6 @@ public class LuminosityWatcherService extends Service {
         watcherThread = WatcherThread.getInstance(this);
 
         Log.i(LOG_TAG, "Criou o serviço");
-
     }
 
     @Override
@@ -73,6 +74,7 @@ public class LuminosityWatcherService extends Service {
             watcherThread.interrupt();
             watcherThread.killInstance();
         }
+
     }
 
 }

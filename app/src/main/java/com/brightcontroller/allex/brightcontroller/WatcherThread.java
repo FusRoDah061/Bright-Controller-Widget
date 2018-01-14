@@ -133,7 +133,9 @@ public class WatcherThread extends Thread implements SensorEventListener {
 
         while(runThread){
 
-            adjustScreenBrightness(getLuxValue());
+            if(managePreferences.getIsRunning()) {
+                adjustScreenBrightness(getLuxValue());
+            }
 
             try {
                 Thread.sleep(verifyInterval);
@@ -234,7 +236,7 @@ public class WatcherThread extends Thread implements SensorEventListener {
 
         try {
             PowerManager powerManager = (PowerManager) context.getSystemService(POWER_SERVICE);
-            isOn = Build.VERSION.SDK_INT>= Build.VERSION_CODES.KITKAT_WATCH&&powerManager.isInteractive()|| Build.VERSION.SDK_INT< Build.VERSION_CODES.KITKAT_WATCH&&powerManager.isScreenOn();
+            isOn = Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT_WATCH && powerManager.isInteractive()|| Build.VERSION.SDK_INT < Build.VERSION_CODES.KITKAT_WATCH && powerManager.isScreenOn();
         } catch(Exception e) { e.printStackTrace(); Log.i(LOG_TAG, e.getMessage()); }
 
         return isOn;
