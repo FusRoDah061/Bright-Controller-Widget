@@ -35,7 +35,7 @@ public class GerenciadorNotificacoes {
             builder.setCategory(Notification.CATEGORY_SERVICE);
         }
 
-        if(prefs.getBoolean(ManagePreferences.PREFS_IS_RUNNING)) {
+        if(prefs.getIsRunning()) {
             builder.setContentText("Executando, toque para pausar");
             builder.setSmallIcon(R.drawable.ic_notification_controller_on);
         }

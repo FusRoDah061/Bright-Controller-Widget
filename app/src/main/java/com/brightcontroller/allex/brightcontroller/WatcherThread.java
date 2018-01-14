@@ -6,10 +6,15 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.hardware.display.DisplayManager;
 import android.net.Uri;
 import android.os.Build;
+import android.os.PowerManager;
 import android.provider.Settings;
 import android.util.Log;
+import android.view.Display;
+
+import static android.content.Context.POWER_SERVICE;
 
 /**
  * Created by allex on 24/06/17.
@@ -57,6 +62,7 @@ public class WatcherThread extends Thread implements SensorEventListener {
     //Preferências
     private long verifyInterval;
     private int brightnessMode;
+    private boolean screenOff;
 
     private Context context;
 
@@ -95,13 +101,15 @@ public class WatcherThread extends Thread implements SensorEventListener {
     private void loadPreferences(Context context){
         managePreferences = new ManagePreferences(context);
 
-        verifyInterval = managePreferences.getLong(ManagePreferences.PREFS_CHECK_INTERVAL);
-        brightnessMode = managePreferences.getInt(ManagePreferences.PREFS_BRIGHTNESS_MODE);
+        verifyInterval = managePreferences.getInterval();
+        brightnessMode = managePreferences.getBrightnessMode();
+        screenOff = managePreferences.getRunOnScreenOff();
     }
 
     public void updatePreferences(){
-        verifyInterval = managePreferences.getLong(ManagePreferences.PREFS_CHECK_INTERVAL);
-        brightnessMode = managePreferences.getInt(ManagePreferences.PREFS_BRIGHTNESS_MODE);
+        verifyInterval = managePreferences.getInterval();
+        brightnessMode = managePreferences.getBrightnessMode();
+        screenOff = managePreferences.getRunOnScreenOff();
     }
 
     /**
@@ -168,6 +176,12 @@ public class WatcherThread extends Thread implements SensorEventListener {
 
         int brightness = 0;
 
+        Log.i(LOG_TAG, "Rodar apagada: " + screenOff + ", Acesa: " + isScreenOn());
+
+        if(!screenOff && !isScreenOn()){
+            return;
+        }
+
         if(brightnessMode == ManagePreferences.VAL_BRIGHTNESS_MODE_LOW_HIGH){
 
             if(lux > HIGH_LIGHT){
@@ -213,6 +227,17 @@ public class WatcherThread extends Thread implements SensorEventListener {
         //Toaster.TshowToast("Alterou o brilho. \nLux: " + String.valueOf(lux) + " \nBrilho: " + String.valueOf(brightness), context);
         Log.i(LOG_TAG, "Alterou o brilho. \nLux: " + String.valueOf(lux) + " \nBrilho: " + String.valueOf(brightness));
 
+    }
+
+    private boolean isScreenOn(){
+        boolean isOn = true;
+
+        try {
+            PowerManager powerManager = (PowerManager) context.getSystemService(POWER_SERVICE);
+            isOn = Build.VERSION.SDK_INT>= Build.VERSION_CODES.KITKAT_WATCH&&powerManager.isInteractive()|| Build.VERSION.SDK_INT< Build.VERSION_CODES.KITKAT_WATCH&&powerManager.isScreenOn();
+        } catch(Exception e) { e.printStackTrace(); Log.i(LOG_TAG, e.getMessage()); }
+
+        return isOn;
     }
 
     /**

@@ -8,6 +8,7 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.RadioButton;
 import android.widget.Switch;
+import android.widget.TextView;
 
 public class PreferencesActivity extends AppCompatActivity implements View.OnClickListener {
 
@@ -16,13 +17,17 @@ public class PreferencesActivity extends AppCompatActivity implements View.OnCli
     private RadioButton rbLowHighBright;
     private RadioButton rbHighLowBright;
     private EditText etCheckInterval;
+    private TextView rememberBrightLabel;
     private Switch switchRememberBright;
+    private TextView screenOffLabel;
+    private Switch switchRunScreenOff;
     private FloatingActionButton btnSave;
 
     //Preferências
     private long verifyInterval;
     private int brightnessMode;
     private boolean rememberBrightness;
+    private boolean screenOff;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,10 +66,37 @@ public class PreferencesActivity extends AppCompatActivity implements View.OnCli
         rbHighLowBright = (RadioButton) findViewById(R.id.rbHighLow);
         rbLowHighBright = (RadioButton) findViewById(R.id.rbLowHigh);
         etCheckInterval = (EditText) findViewById(R.id.editTextInterval);
+        screenOffLabel = (TextView) findViewById(R.id.screenOffLabel);
         switchRememberBright = (Switch) findViewById(R.id.switchRemeberBright);
+        switchRunScreenOff = (Switch) findViewById(R.id.switchScreenOff);
+        rememberBrightLabel = (TextView) findViewById(R.id.rememberBrightLabel);
         btnSave = (FloatingActionButton) findViewById(R.id.btnSave);
 
         btnSave.setOnClickListener(this);
+
+        screenOffLabel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(switchRunScreenOff.isChecked()){
+                    switchRunScreenOff.setChecked(false);
+                }
+                else{
+                    switchRunScreenOff.setChecked(true);
+                }
+            }
+        });
+
+        rememberBrightLabel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(switchRememberBright.isChecked()){
+                    switchRememberBright.setChecked(false);
+                }
+                else{
+                    switchRememberBright.setChecked(true);
+                }
+            }
+        });
 
     }
 
@@ -73,10 +105,10 @@ public class PreferencesActivity extends AppCompatActivity implements View.OnCli
      */
     private void loadPreferences(){
 
-        verifyInterval = managePreferences.getLong(ManagePreferences.PREFS_CHECK_INTERVAL);
-        rememberBrightness = managePreferences.getBoolean(ManagePreferences.PREFS_BACKUP_BRIGHTNESS_LEVEL);
-        brightnessMode = managePreferences.getInt(ManagePreferences.PREFS_BRIGHTNESS_MODE);
-
+        verifyInterval = managePreferences.getInterval();
+        rememberBrightness = managePreferences.getRememberBrightness();
+        brightnessMode = managePreferences.getBrightnessMode();
+        screenOff = managePreferences.getRunOnScreenOff();
     }
 
     /**
@@ -87,6 +119,8 @@ public class PreferencesActivity extends AppCompatActivity implements View.OnCli
         etCheckInterval.setText(String.valueOf(verifyInterval));
 
         switchRememberBright.setChecked(rememberBrightness);
+
+        switchRunScreenOff.setChecked(screenOff);
 
         if(brightnessMode == ManagePreferences.VAL_BRIGHTNESS_MODE_LOW_HIGH){
             rbLowHighBright.setChecked(true);
@@ -101,6 +135,7 @@ public class PreferencesActivity extends AppCompatActivity implements View.OnCli
 
         verifyInterval = Long.parseLong(etCheckInterval.getText().toString());
         rememberBrightness = switchRememberBright.isChecked();
+        screenOff = switchRunScreenOff.isChecked();
 
         if(rbLowHighBright.isChecked()){
             brightnessMode = ManagePreferences.VAL_BRIGHTNESS_MODE_LOW_HIGH;
@@ -109,9 +144,10 @@ public class PreferencesActivity extends AppCompatActivity implements View.OnCli
             brightnessMode = ManagePreferences.VAL_BRIGHTNESS_MODE_HIGH_LOW;
         }
 
-        managePreferences.writeLong(ManagePreferences.PREFS_CHECK_INTERVAL, verifyInterval);
-        managePreferences.writeBoolean(ManagePreferences.PREFS_BACKUP_BRIGHTNESS_LEVEL, rememberBrightness);
-        managePreferences.writeInt(ManagePreferences.PREFS_BRIGHTNESS_MODE, brightnessMode);
+        managePreferences.setInterval(verifyInterval);
+        managePreferences.setRememberBrightness(rememberBrightness);
+        managePreferences.setBrightnessMode(brightnessMode);
+        managePreferences.setRunOnScreenOff(screenOff);
 
         Toaster.showToast("Mudanças salvas com sucesso.", this);
 
@@ -121,7 +157,6 @@ public class PreferencesActivity extends AppCompatActivity implements View.OnCli
 
     private void updateSettings(){
         WatcherThread thread = WatcherThread.getInstance(getBaseContext());
-
         thread.updatePreferences();
     }
 

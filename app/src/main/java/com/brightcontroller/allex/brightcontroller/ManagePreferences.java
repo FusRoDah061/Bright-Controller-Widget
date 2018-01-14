@@ -47,6 +47,10 @@ public class ManagePreferences {
      */
     public static final String PREFS_BACKUP_BRIGHTNESS_LEVEL = "com.brightcontroller.allex.REMEMBER_BRIGHTNESS";
 
+    public static final String PREFS_RUN_ON_SCREEN_OFF = "com.brightcontroller.allex.SCREEN_OFF";
+
+    public static final String PREFS_BRIGHTNESS_LEVEL = "com.brightcontroller.allex.BRIGHTNESS_LEVEL";
+
     //Valores das preferências
 
     /**
@@ -79,6 +83,8 @@ public class ManagePreferences {
      */
     public static final boolean VAL_REMEMBER_BRIGHTNESS_LEVEL = true;
 
+    public static final boolean VAL_RUN_ON_SCREEN_OFF = false;
+
     private SharedPreferences sharedPreferences;
 
     public ManagePreferences(Context context){
@@ -97,6 +103,7 @@ public class ManagePreferences {
         writeInt(PREFS_BRIGHTNESS_MODE, VAL_BRIGHTNESS_MODE_LOW_HIGH);
         writeLong(PREFS_CHECK_INTERVAL, VAL_DEFAULT_UPDATE_INTERVAL);
         writeBoolean(PREFS_BACKUP_BRIGHTNESS_LEVEL, VAL_REMEMBER_BRIGHTNESS_LEVEL);
+        writeBoolean(PREFS_RUN_ON_SCREEN_OFF, VAL_RUN_ON_SCREEN_OFF);
 
         writeBoolean(PREFS_EXISTS, true);
     }
@@ -114,7 +121,7 @@ public class ManagePreferences {
      * @param key chave que será modificada
      * @param value novo valor da chave
      */
-    public void writeInt(String key, int value){
+    private void writeInt(String key, int value){
 
         SharedPreferences.Editor editor = sharedPreferences.edit();
 
@@ -129,7 +136,7 @@ public class ManagePreferences {
      * @param key chave que será modificada
      * @param value novo valor da chave
      */
-    public void writeFloat(String key, float value){
+    private void writeFloat(String key, float value){
 
         SharedPreferences.Editor editor = sharedPreferences.edit();
 
@@ -144,7 +151,7 @@ public class ManagePreferences {
      * @param key chave que será modificada
      * @param value novo valor da chave
      */
-    public void writeString(String key, String value){
+    private void writeString(String key, String value){
 
         SharedPreferences.Editor editor = sharedPreferences.edit();
 
@@ -159,7 +166,7 @@ public class ManagePreferences {
      * @param key chave que será modificada
      * @param value novo valor da chave
      */
-    public void writeBoolean(String key, boolean value){
+    private void writeBoolean(String key, boolean value){
 
         SharedPreferences.Editor editor = sharedPreferences.edit();
 
@@ -174,7 +181,7 @@ public class ManagePreferences {
      * @param key chave que será modificada
      * @param value novo valor da chave
      */
-    public void writeLong(String key, long value){
+    private void writeLong(String key, long value){
 
         SharedPreferences.Editor editor = sharedPreferences.edit();
 
@@ -190,7 +197,7 @@ public class ManagePreferences {
      * @param key chave que terá seu valor buscado.
      * @return ou valor da chave buscada ou VAL_DEFAULT_VALUE_INT caso a chave não exista ou não seja do tipo inteiro.
      */
-    public int getInt(String key){
+    private int getInt(String key){
 
         try {
 
@@ -208,7 +215,7 @@ public class ManagePreferences {
      * @param key chave que terá seu valor buscado.
      * @return ou valor da chave buscada ou VAL_DEFAULT_VALUE_INT caso a chave não exista ou não seja do tipo float.
      */
-    public float getFloat(String key){
+    private float getFloat(String key){
 
         try{
 
@@ -226,7 +233,7 @@ public class ManagePreferences {
      * @param key chave que terá seu valor buscado.
      * @return ou valor da chave buscada ou null caso a chave não exista ou não seja do tipo String.
      */
-    public String getString(String key){
+    private String getString(String key){
 
         try{
 
@@ -244,7 +251,7 @@ public class ManagePreferences {
      * @param key chave que terá seu valor buscado.
      * @return ou valor da chave buscada ou false caso a chave não exista ou não seja do tipo boolean.
      */
-    public boolean getBoolean(String key){
+    private boolean getBoolean(String key){
 
         try{
 
@@ -262,7 +269,7 @@ public class ManagePreferences {
      * @param key chave que terá seu valor buscado.
      * @return ou valor da chave buscada ou VAL_DEFAULT_VALUE_INT caso a chave não exista ou não seja do tipo long.
      */
-    public long getLong(String key){
+    private long getLong(String key){
 
         try{
 
@@ -273,6 +280,53 @@ public class ManagePreferences {
             return VAL_DEFAULT_VALUE_INT;
         }
 
+    }
+
+    public void setInterval(long value){
+        writeLong(PREFS_CHECK_INTERVAL,value);
+    }
+
+    public void setRememberBrightness(boolean value){
+        writeBoolean(PREFS_BACKUP_BRIGHTNESS_LEVEL, value);
+    }
+
+    public void setBrightnessMode(int value){
+        writeInt(PREFS_BRIGHTNESS_MODE, value);
+    }
+
+    public void setRunOnScreenOff(boolean value){
+        writeBoolean(PREFS_RUN_ON_SCREEN_OFF, value);
+    }
+
+    public void setIsRunning(boolean value){
+        writeBoolean(PREFS_IS_RUNNING, value);
+    }
+
+    public void setBrightnessLevel(int value){
+        writeInt(PREFS_BRIGHTNESS_LEVEL, value);
+    }
+
+    public long getInterval(){
+        return getLong(PREFS_CHECK_INTERVAL);
+    }
+
+    public boolean getRememberBrightness(){
+        return getBoolean(PREFS_BACKUP_BRIGHTNESS_LEVEL);
+    }
+
+    public int getBrightnessMode(){
+        return getInt(ManagePreferences.PREFS_BRIGHTNESS_MODE);
+    }
+
+    public boolean getRunOnScreenOff(){
+        return getBoolean(PREFS_RUN_ON_SCREEN_OFF);
+    }
+    public boolean getIsRunning(){
+        return getBoolean(PREFS_IS_RUNNING);
+    }
+
+    public int getBrightnessLevel(){
+        return getInt(PREFS_BRIGHTNESS_LEVEL);
     }
 
 }

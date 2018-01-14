@@ -20,8 +20,6 @@ public class BrightControllerWidget extends AppWidgetProvider {
 
     private static final String LOG_TAG = "brightcontrollerwidget";
 
-    private final String BRIGHTNESS_PREF_KEY = "previous_brightness_value";
-
     private static final String INTENT_ACTION = "intent.action.update_status";
     private static final String SERVICE_ON = "ON";
     private static final String SERVICE_OFF = "OFF";
@@ -69,7 +67,7 @@ public class BrightControllerWidget extends AppWidgetProvider {
             managePreferences = new ManagePreferences(context);
         }
 
-        rememberBrightness = managePreferences.getBoolean(ManagePreferences.PREFS_BACKUP_BRIGHTNESS_LEVEL);
+        rememberBrightness = managePreferences.getRememberBrightness();
 
         Log.i(LOG_TAG, "Carregou preferências:\n\trememberBrightness = " + String.valueOf(rememberBrightness));
     }
@@ -153,7 +151,7 @@ public class BrightControllerWidget extends AppWidgetProvider {
 
                 //Toast.makeText(context, "OFF", Toast.LENGTH_SHORT).show();
                 views.setTextViewText(R.id.btn_controller_status, SERVICE_ON);
-                managePreferences.writeBoolean(ManagePreferences.PREFS_IS_RUNNING, false);
+                managePreferences.setIsRunning(false);
 
                 if(rememberBrightness) {
                     restoreBrightness(context);
@@ -168,7 +166,7 @@ public class BrightControllerWidget extends AppWidgetProvider {
 
                 //Toast.makeText(context, "ON", Toast.LENGTH_SHORT).show();
                 views.setTextViewText(R.id.btn_controller_status, SERVICE_OFF);
-                managePreferences.writeBoolean(ManagePreferences.PREFS_IS_RUNNING, true);
+                managePreferences.setIsRunning(true);
 
                 if(rememberBrightness) {
                     saveBrightness(context);
@@ -225,7 +223,7 @@ public class BrightControllerWidget extends AppWidgetProvider {
             }
 
             int curBrightnessValue = Settings.System.getInt(context.getContentResolver(), Settings.System.SCREEN_BRIGHTNESS);
-            managePreferences.writeInt(BRIGHTNESS_PREF_KEY, curBrightnessValue);
+            managePreferences.setBrightnessLevel(curBrightnessValue);
 
             Log.i(LOG_TAG, "Salvou o brilho: " + String.valueOf(curBrightnessValue));
         } catch (Settings.SettingNotFoundException e) {
@@ -239,7 +237,7 @@ public class BrightControllerWidget extends AppWidgetProvider {
             managePreferences = new ManagePreferences(context);
         }
 
-        int brightness = managePreferences.getInt(BRIGHTNESS_PREF_KEY);
+        int brightness = managePreferences.getBrightnessLevel();
 
         Settings.System.putInt(context.getContentResolver(), Settings.System.SCREEN_BRIGHTNESS, brightness);
 
