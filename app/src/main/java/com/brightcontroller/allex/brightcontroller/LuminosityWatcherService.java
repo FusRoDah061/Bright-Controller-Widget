@@ -1,6 +1,8 @@
 package com.brightcontroller.allex.brightcontroller;
 
 import android.app.Service;
+import android.appwidget.AppWidgetManager;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Binder;
@@ -13,6 +15,7 @@ import android.os.RemoteException;
 import android.support.annotation.IntDef;
 import android.support.annotation.Nullable;
 import android.util.Log;
+import android.widget.RemoteViews;
 import android.widget.Toast;
 
 import java.io.FileDescriptor;
@@ -21,14 +24,12 @@ import java.io.FileDescriptor;
  * Created by allex on 24/06/17.
  */
 
-public class LuminosityWatcherService extends Service {
+public class LuminosityWatcherService extends Service implements Thread.UncaughtExceptionHandler {
 
     private final String LOG_TAG = "luminositywatcher";
 
     private WatcherThread watcherThread;
     private Context appContext = getBaseContext();
-
-    private final int NOTIFICATION_ID = 8991;
 
     @Nullable
     @Override
@@ -41,6 +42,8 @@ public class LuminosityWatcherService extends Service {
         super.onCreate();
 
         watcherThread = WatcherThread.getInstance(this);
+
+        watcherThread.setUncaughtExceptionHandler(this);
 
         Log.i(LOG_TAG, "Criou o serviço");
     }
@@ -77,4 +80,26 @@ public class LuminosityWatcherService extends Service {
 
     }
 
+    @Override
+    public void uncaughtException(Thread t, Throwable e) {
+
+
+
+        //if(e.getMessage().toLowerCase().contains("android.permission.write_settings")){
+            //Toast.makeText(this,"Sem permissão para alterar o brilho. Parando BrightController", Toast.LENGTH_LONG).show();
+
+
+            Log.i(LOG_TAG, "Thread crashou: " + e.getMessage());
+            //Atualiza o widget
+            new ManagePreferences(this).setIsRunning(false);
+
+            Intent intent = new Intent(this, BrightControllerWidget.class);
+            intent.setAction("android.appwidget.action.APPWIDGET_UPDATE");
+            int ids[] = AppWidgetManager.getInstance(getApplication()).getAppWidgetIds(new ComponentName(getApplication(), BrightControllerWidget.class));
+            intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS,ids);
+            sendBroadcast(intent);
+        //}
+
+
+    }
 }

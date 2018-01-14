@@ -1,18 +1,15 @@
 package com.brightcontroller.allex.brightcontroller;
 
 import android.content.Context;
-import android.content.Intent;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
-import android.hardware.display.DisplayManager;
-import android.net.Uri;
 import android.os.Build;
 import android.os.PowerManager;
 import android.provider.Settings;
 import android.util.Log;
-import android.view.Display;
+import android.widget.Toast;
 
 import static android.content.Context.POWER_SERVICE;
 
@@ -225,9 +222,18 @@ public class WatcherThread extends Thread implements SensorEventListener {
 
         }
 
-        Settings.System.putInt(context.getContentResolver(), Settings.System.SCREEN_BRIGHTNESS, brightness);
-        //Toaster.TshowToast("Alterou o brilho. \nLux: " + String.valueOf(lux) + " \nBrilho: " + String.valueOf(brightness), context);
-        Log.i(LOG_TAG, "Alterou o brilho. \nLux: " + String.valueOf(lux) + " \nBrilho: " + String.valueOf(brightness));
+        //try {
+            Settings.System.putInt(context.getContentResolver(), Settings.System.SCREEN_BRIGHTNESS, brightness);
+            //Toaster.TshowToast("Alterou o brilho. \nLux: " + String.valueOf(lux) + " \nBrilho: " + String.valueOf(brightness), context);
+            Log.i(LOG_TAG, "Alterou o brilho. \nLux: " + String.valueOf(lux) + " \nBrilho: " + String.valueOf(brightness));
+        /*}
+        catch (SecurityException se){
+            Toast.makeText(context,"Sem permissão para alterar o brilho. Parando BrightController", Toast.LENGTH_LONG).show();
+            managePreferences.setIsRunning(false);
+        }
+        catch (Exception e){
+            e.printStackTrace();
+        }*/
 
     }
 

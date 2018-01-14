@@ -11,6 +11,7 @@ import android.os.Build;
 import android.provider.Settings;
 import android.util.Log;
 import android.widget.RemoteViews;
+import android.widget.Toast;
 
 
 /**
@@ -24,7 +25,7 @@ public class BrightControllerWidget extends AppWidgetProvider {
     private static final String SERVICE_ON = "ON";
     private static final String SERVICE_OFF = "OFF";
 
-    private static boolean startService = false;
+    private static boolean isRunning = false;
     private static boolean hasPermission = false;
 
     private ManagePreferences managePreferences;
@@ -34,17 +35,14 @@ public class BrightControllerWidget extends AppWidgetProvider {
 
     static void updateAppWidget(Context context, AppWidgetManager appWidgetManager, int appWidgetId) {
 
-        ManagePreferences prefs = new ManagePreferences(context);
+        Log.i(LOG_TAG, "Atualizando widget");
 
         // Construct the RemoteViews object
         RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.bright_controller_widget);
 
-        if(startService){
-            views.setTextViewText(R.id.btn_controller_status, SERVICE_OFF);
-        }
-        else{
-            views.setTextViewText(R.id.btn_controller_status, SERVICE_ON);
-        }
+        new ManagePreferences(context).setIsRunning(false);
+
+        views.setTextViewText(R.id.btn_controller_status, SERVICE_ON);
 
         //Intent com uma ação que será recebida pelo próprio widget
         Intent intent = new Intent(context, BrightControllerWidget.class);
@@ -66,6 +64,7 @@ public class BrightControllerWidget extends AppWidgetProvider {
             managePreferences = new ManagePreferences(context);
         }
 
+        managePreferences.setIsRunning(false);
         rememberBrightness = managePreferences.getRememberBrightness();
 
         Log.i(LOG_TAG, "Carregou preferências:\n\trememberBrightness = " + String.valueOf(rememberBrightness));
@@ -73,6 +72,8 @@ public class BrightControllerWidget extends AppWidgetProvider {
 
     @Override
     public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
+        Log.i(LOG_TAG, "Caiu para atualizar o wdiget");
+
         loadPreferences(context);
 
         // There may be multiple widgets active, so update all of them
@@ -85,7 +86,6 @@ public class BrightControllerWidget extends AppWidgetProvider {
     public void onEnabled(Context context) {
         // Enter relevant functionality for when the first widget is created
 
-
         loadPreferences(context);
 
         if(rememberBrightness) {
@@ -94,7 +94,7 @@ public class BrightControllerWidget extends AppWidgetProvider {
 
         Log.i(LOG_TAG, "Iniciou o widget");
 
-        if(checkSystemWritePermission(context)){
+        /*if(checkSystemWritePermission(context)){
             hasPermission = true;
             Log.i(LOG_TAG, "Tem permisão de escrita");
         }
@@ -102,7 +102,7 @@ public class BrightControllerWidget extends AppWidgetProvider {
            //Toaster.showToast("Sem premissão de escrita.", context);
             hasPermission = false;
             Log.i(LOG_TAG, "Sem premissão de escrita.");
-        }
+        }*/
 
     }
 
@@ -111,8 +111,7 @@ public class BrightControllerWidget extends AppWidgetProvider {
         // Enter relevant functionality for when the last widget is disabled
 
         //Finalizar o serviço aqui
-        Intent intent = new Intent(context, LuminosityWatcherService.class);
-        context.stopService(intent);
+        stopWatcher(context);
 
         if(rememberBrightness) {
             restoreBrightness(context);
@@ -131,64 +130,68 @@ public class BrightControllerWidget extends AppWidgetProvider {
 
             Log.i(LOG_TAG, "Pegou clique");
 
-            if(!hasPermission){
-                hasPermission = checkSystemWritePermission(context);
-            }
+            hasPermission = checkSystemWritePermission(context);
 
-            AppWidgetManager widgetManager = AppWidgetManager.getInstance(context);
+            if(hasPermission) {
+                AppWidgetManager widgetManager = AppWidgetManager.getInstance(context);
 
-            // Construct the RemoteViews object
-            RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.bright_controller_widget);
-            ComponentName cp = new ComponentName(context, BrightControllerWidget.class);
+                // Construct the RemoteViews object
+                RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.bright_controller_widget);
+                ComponentName cp = new ComponentName(context, BrightControllerWidget.class);
 
-            if(startService){
-                //Começa o serviço
-                startService = false;
+                isRunning = managePreferences.getIsRunning();
 
-                //Toast.makeText(context, "OFF", Toast.LENGTH_SHORT).show();
-                views.setTextViewText(R.id.btn_controller_status, SERVICE_ON);
-                managePreferences.setIsRunning(false);
+                if (isRunning) {
+                    //Começa o serviço
+                    isRunning = false;
 
-                if(rememberBrightness) {
-                    restoreBrightness(context);
+                    //Toast.makeText(context, "OFF", Toast.LENGTH_SHORT).show();
+                    views.setTextViewText(R.id.btn_controller_status, SERVICE_ON);
+
+                    if (rememberBrightness) {
+                        restoreBrightness(context);
+                    }
+
+                    stopWatcher(context);
+                    Log.i(LOG_TAG, "Parou a aplicação");
+                } else {
+                    isRunning = true;
+                    //Finaliza o serviço
+
+                    //Toast.makeText(context, "ON", Toast.LENGTH_SHORT).show();
+                    views.setTextViewText(R.id.btn_controller_status, SERVICE_OFF);
+
+                    if (rememberBrightness) {
+                        saveBrightness(context);
+                    }
+
+                    startWatcher(context);
+                    Log.i(LOG_TAG, "Retomou a aplicação");
                 }
 
-                stopWatcher(context);
-                Log.i(LOG_TAG, "Parou a aplicação");
+                Log.i(LOG_TAG, "Status:\nisRunning = " + String.valueOf(isRunning) + "\nhasPermission = " + String.valueOf(hasPermission) + "\nrememberBrightness = " + String.valueOf(rememberBrightness));
+
+                widgetManager.updateAppWidget(cp, views);
             }
             else{
-                startService = true;
-                //Finaliza o serviço
-
-                //Toast.makeText(context, "ON", Toast.LENGTH_SHORT).show();
-                views.setTextViewText(R.id.btn_controller_status, SERVICE_OFF);
-                managePreferences.setIsRunning(true);
-
-                if(rememberBrightness) {
-                    saveBrightness(context);
-                }
-
-                startWatcher(context);
-                Log.i(LOG_TAG, "Retomou a aplicação");
+                Toast.makeText(context,"Sem permissão para alterar o brilho.", Toast.LENGTH_LONG).show();
             }
-
-            Log.i(LOG_TAG, "Atualizou notificação");
-
-            Log.i(LOG_TAG, "Status:\nstartService = " + String.valueOf(startService) + "\nhasPermission = " + String.valueOf(hasPermission) + "\nrememberBrightness = " + String.valueOf(rememberBrightness));
-
-            widgetManager.updateAppWidget(cp, views);
-
         }
     }
 
     private void startWatcher(Context context){
         if(hasPermission){
+            managePreferences.setIsRunning(true);
+
             Intent serviceStart = new Intent(context, LuminosityWatcherService.class);
             context.startService(serviceStart);
         }
     }
 
     private void stopWatcher(Context context){
+
+        new ManagePreferences(context).setIsRunning(false);
+
         Intent serviceStop = new Intent(context, LuminosityWatcherService.class);
         context.stopService(serviceStop);
     }
@@ -200,6 +203,8 @@ public class BrightControllerWidget extends AppWidgetProvider {
                 retVal = true;
             }
             else {
+                retVal = false;
+
                 Log.i(LOG_TAG, "Começando pedido de permissão");
                 Intent intent = new Intent(android.provider.Settings.ACTION_MANAGE_WRITE_SETTINGS);
                 intent.setData(Uri.parse("package:" + context.getPackageName()));
@@ -208,35 +213,44 @@ public class BrightControllerWidget extends AppWidgetProvider {
                 Log.i(LOG_TAG, "Mostrou pedido de permissão");
             }
         }
+
         return retVal;
     }
 
     private void saveBrightness(Context context){
-        try {
-            if(null == managePreferences){
-                managePreferences = new ManagePreferences(context);
+        hasPermission = checkSystemWritePermission(context);
+
+        if(hasPermission) {
+            try {
+                if (null == managePreferences) {
+                    managePreferences = new ManagePreferences(context);
+                }
+
+                int curBrightnessValue = Settings.System.getInt(context.getContentResolver(), Settings.System.SCREEN_BRIGHTNESS);
+                managePreferences.setBrightnessLevel(curBrightnessValue);
+
+                Log.i(LOG_TAG, "Salvou o brilho: " + String.valueOf(curBrightnessValue));
+            } catch (Settings.SettingNotFoundException e) {
+                e.printStackTrace();
             }
-
-            int curBrightnessValue = Settings.System.getInt(context.getContentResolver(), Settings.System.SCREEN_BRIGHTNESS);
-            managePreferences.setBrightnessLevel(curBrightnessValue);
-
-            Log.i(LOG_TAG, "Salvou o brilho: " + String.valueOf(curBrightnessValue));
-        } catch (Settings.SettingNotFoundException e) {
-            e.printStackTrace();
         }
 
     }
 
     private void restoreBrightness(Context context){
-        if(null == managePreferences){
-            managePreferences = new ManagePreferences(context);
+
+        try {
+            if (null == managePreferences) {
+                managePreferences = new ManagePreferences(context);
+            }
+
+            int brightness = managePreferences.getBrightnessLevel();
+
+            Settings.System.putInt(context.getContentResolver(), Settings.System.SCREEN_BRIGHTNESS, brightness);
+
+            Log.i(LOG_TAG, "Restaurou o brilho: " + String.valueOf(brightness));
         }
-
-        int brightness = managePreferences.getBrightnessLevel();
-
-        Settings.System.putInt(context.getContentResolver(), Settings.System.SCREEN_BRIGHTNESS, brightness);
-
-        Log.i(LOG_TAG, "Restaurou o brilho: " + String.valueOf(brightness));
+        catch (Exception e){ e.printStackTrace(); }
 
     }
 
