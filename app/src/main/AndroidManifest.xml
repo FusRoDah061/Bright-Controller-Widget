@@ -27,6 +27,10 @@
         <activity
             android:name=".PreferencesActivity"
             android:label="@string/title_activity_preferences" />
+
+        <activity android:name=".SolicitaPermissaoActivity"
+            android:label="@string/title_activity_permission"
+            android:theme="@style/Theme.AppCompat.Dialog"/>
     </application>
 
 </manifest>

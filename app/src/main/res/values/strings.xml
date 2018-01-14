@@ -3,4 +3,5 @@
     <string name="controller_status">ON</string>
     <string name="add_widget">Bright Controller</string>
     <string name="title_activity_preferences">Preferências</string>
+    <string name="title_activity_permission">Solicitação de permissão</string>
 </resources>

@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:padding="12dp"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:background="#f1f1f1"
+    android:gravity="center"
+    tools:context="com.brightcontroller.allex.brightcontroller.SolicitaPermissaoActivity">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Para que o BrightController consiga alterar o brilho da tela, ele deve ter acesso às configurações do sistema. Clique em 'Ok' para seguir à tela de permissão."
+        android:gravity="center_horizontal"
+        android:textColor="@color/colorAccent"/>
+
+    <Button
+        android:id="@+id/btnPermOk"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Ok"/>
+
+</LinearLayout>

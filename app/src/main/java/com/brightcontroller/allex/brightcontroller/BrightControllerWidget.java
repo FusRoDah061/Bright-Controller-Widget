@@ -1,10 +1,12 @@
 package com.brightcontroller.allex.brightcontroller;
 
+import android.app.AlertDialog;
 import android.app.PendingIntent;
 import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProvider;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
@@ -196,7 +198,7 @@ public class BrightControllerWidget extends AppWidgetProvider {
         context.stopService(serviceStop);
     }
 
-    private boolean checkSystemWritePermission(Context context) {
+    private boolean checkSystemWritePermission(final Context context) {
         boolean retVal = true;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             if (Settings.System.canWrite(context)) {
@@ -206,11 +208,9 @@ public class BrightControllerWidget extends AppWidgetProvider {
                 retVal = false;
 
                 Log.i(LOG_TAG, "Começando pedido de permissão");
-                Intent intent = new Intent(android.provider.Settings.ACTION_MANAGE_WRITE_SETTINGS);
-                intent.setData(Uri.parse("package:" + context.getPackageName()));
-                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                context.startActivity(intent);
-                Log.i(LOG_TAG, "Mostrou pedido de permissão");
+
+                Intent perm = new Intent(context, SolicitaPermissaoActivity.class);
+                context.startActivity(perm);
             }
         }
 
