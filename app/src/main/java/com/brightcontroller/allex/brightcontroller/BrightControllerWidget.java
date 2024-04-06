@@ -1,19 +1,18 @@
 package com.brightcontroller.allex.brightcontroller;
 
-import android.app.AlertDialog;
 import android.app.PendingIntent;
 import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProvider;
 import android.content.ComponentName;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Build;
 import android.provider.Settings;
 import android.util.Log;
 import android.widget.RemoteViews;
 import android.widget.Toast;
+
+import androidx.core.content.ContextCompat;
 
 
 /**
@@ -21,7 +20,7 @@ import android.widget.Toast;
  */
 public class BrightControllerWidget extends AppWidgetProvider {
 
-    private static final String LOG_TAG = "brightcontrollerwidget";
+    private static final String LOG_TAG = BrightControllerWidget.class.getSimpleName();
 
     private static final String INTENT_ACTION = "intent.action.update_status";
     private static final String SERVICE_ON = "ON";
@@ -37,7 +36,7 @@ public class BrightControllerWidget extends AppWidgetProvider {
 
     static void updateAppWidget(Context context, AppWidgetManager appWidgetManager, int appWidgetId) {
 
-        Log.i(LOG_TAG, "Atualizando widget");
+        Log.d(LOG_TAG, "Atualizando widget");
 
         // Construct the RemoteViews object
         RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.bright_controller_widget);
@@ -50,11 +49,11 @@ public class BrightControllerWidget extends AppWidgetProvider {
         Intent intent = new Intent(context, BrightControllerWidget.class);
         intent.setAction(INTENT_ACTION);
         //PendinIntent que carrega o intent acima e dispara quando a TextView é clicada
-        PendingIntent toggleIntent = PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        PendingIntent toggleIntent = PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
         views.setOnClickPendingIntent(R.id.btn_controller_status, toggleIntent);
 
         //PendingIntent que abre a tela de configurações
-        PendingIntent prefsIntent = PendingIntent.getActivity(context, 0, new Intent(context, PreferencesActivity.class), 0);
+        PendingIntent prefsIntent = PendingIntent.getActivity(context, 0, new Intent(context, PreferencesActivity.class), PendingIntent.FLAG_IMMUTABLE);
         views.setOnClickPendingIntent(R.id.btn_preferences, prefsIntent);
 
         // Instruct the widget manager to update the widget
@@ -69,12 +68,12 @@ public class BrightControllerWidget extends AppWidgetProvider {
         managePreferences.setIsRunning(false);
         rememberBrightness = managePreferences.getRememberBrightness();
 
-        Log.i(LOG_TAG, "Carregou preferências:\n\trememberBrightness = " + String.valueOf(rememberBrightness));
+        Log.d(LOG_TAG, "Carregou preferências:\n\trememberBrightness = " + String.valueOf(rememberBrightness));
     }
 
     @Override
     public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
-        Log.i(LOG_TAG, "Caiu para atualizar o wdiget");
+        Log.d(LOG_TAG, "Caiu para atualizar o wdiget");
 
         loadPreferences(context);
 
@@ -87,23 +86,22 @@ public class BrightControllerWidget extends AppWidgetProvider {
     @Override
     public void onEnabled(Context context) {
         // Enter relevant functionality for when the first widget is created
-
         loadPreferences(context);
 
         if(rememberBrightness) {
             saveBrightness(context);
         }
 
-        Log.i(LOG_TAG, "Iniciou o widget");
+        Log.d(LOG_TAG, "Iniciou o widget");
 
         /*if(checkSystemWritePermission(context)){
             hasPermission = true;
-            Log.i(LOG_TAG, "Tem permisão de escrita");
+            Log.d(LOG_TAG, "Tem permisão de escrita");
         }
         else{
            //Toaster.showToast("Sem premissão de escrita.", context);
             hasPermission = false;
-            Log.i(LOG_TAG, "Sem premissão de escrita.");
+            Log.d(LOG_TAG, "Sem premissão de escrita.");
         }*/
 
     }
@@ -130,7 +128,7 @@ public class BrightControllerWidget extends AppWidgetProvider {
                 managePreferences = new ManagePreferences(context);
             }
 
-            Log.i(LOG_TAG, "Pegou clique");
+            Log.d(LOG_TAG, "Pegou clique");
 
             hasPermission = checkSystemWritePermission(context);
 
@@ -155,7 +153,7 @@ public class BrightControllerWidget extends AppWidgetProvider {
                     }
 
                     stopWatcher(context);
-                    Log.i(LOG_TAG, "Parou a aplicação");
+                    Log.d(LOG_TAG, "Parou a aplicação");
                 } else {
                     isRunning = true;
                     //Finaliza o serviço
@@ -168,10 +166,10 @@ public class BrightControllerWidget extends AppWidgetProvider {
                     }
 
                     startWatcher(context);
-                    Log.i(LOG_TAG, "Retomou a aplicação");
+                    Log.d(LOG_TAG, "Retomou a aplicação");
                 }
 
-                Log.i(LOG_TAG, "Status:\nisRunning = " + String.valueOf(isRunning) + "\nhasPermission = " + String.valueOf(hasPermission) + "\nrememberBrightness = " + String.valueOf(rememberBrightness));
+                Log.d(LOG_TAG, "Status:\nisRunning = " + String.valueOf(isRunning) + "\nhasPermission = " + String.valueOf(hasPermission) + "\nrememberBrightness = " + String.valueOf(rememberBrightness));
 
                 widgetManager.updateAppWidget(cp, views);
             }
@@ -186,12 +184,11 @@ public class BrightControllerWidget extends AppWidgetProvider {
             managePreferences.setIsRunning(true);
 
             Intent serviceStart = new Intent(context, LuminosityWatcherService.class);
-            context.startService(serviceStart);
+            ContextCompat.startForegroundService(context, serviceStart);
         }
     }
 
     private void stopWatcher(Context context){
-
         new ManagePreferences(context).setIsRunning(false);
 
         Intent serviceStop = new Intent(context, LuminosityWatcherService.class);
@@ -207,9 +204,10 @@ public class BrightControllerWidget extends AppWidgetProvider {
             else {
                 retVal = false;
 
-                Log.i(LOG_TAG, "Começando pedido de permissão");
+                Log.d(LOG_TAG, "Começando pedido de permissão");
 
                 Intent perm = new Intent(context, SolicitaPermissaoActivity.class);
+                perm.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 context.startActivity(perm);
             }
         }
@@ -229,7 +227,7 @@ public class BrightControllerWidget extends AppWidgetProvider {
                 int curBrightnessValue = Settings.System.getInt(context.getContentResolver(), Settings.System.SCREEN_BRIGHTNESS);
                 managePreferences.setBrightnessLevel(curBrightnessValue);
 
-                Log.i(LOG_TAG, "Salvou o brilho: " + String.valueOf(curBrightnessValue));
+                Log.d(LOG_TAG, "Salvou o brilho: " + String.valueOf(curBrightnessValue));
             } catch (Settings.SettingNotFoundException e) {
                 e.printStackTrace();
             }
@@ -248,11 +246,10 @@ public class BrightControllerWidget extends AppWidgetProvider {
 
             Settings.System.putInt(context.getContentResolver(), Settings.System.SCREEN_BRIGHTNESS, brightness);
 
-            Log.i(LOG_TAG, "Restaurou o brilho: " + String.valueOf(brightness));
+            Log.d(LOG_TAG, "Restaurou o brilho: " + String.valueOf(brightness));
         }
         catch (Exception e){ e.printStackTrace(); }
 
     }
 
 }
-

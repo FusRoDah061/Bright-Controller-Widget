@@ -1,9 +1,8 @@
 package com.brightcontroller.allex.brightcontroller;
 
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.SwitchCompat;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import androidx.appcompat.app.AppCompatActivity;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.RadioButton;
@@ -116,7 +115,7 @@ public class PreferencesActivity extends AppCompatActivity implements View.OnCli
      */
     private void updateComponents(){
 
-        etCheckInterval.setText(String.valueOf(verifyInterval));
+        etCheckInterval.setText(String.valueOf(verifyInterval / 1000));
 
         switchRememberBright.setChecked(rememberBrightness);
 
@@ -133,7 +132,7 @@ public class PreferencesActivity extends AppCompatActivity implements View.OnCli
 
     private void saveChanges(){
 
-        verifyInterval = Long.parseLong(etCheckInterval.getText().toString());
+        verifyInterval = Long.parseLong(etCheckInterval.getText().toString()) * 1000;
         rememberBrightness = switchRememberBright.isChecked();
         screenOff = switchRunScreenOff.isChecked();
 
